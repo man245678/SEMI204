@@ -1,0 +1,56 @@
+$`timescale 1ns / 1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: 
+// 
+// Create Date: 2019/09/11 17:35:24
+// Design Name: 
+// Module Name: clock
+// Project Name: 
+// Target Devices: 
+// Tool Versions: 
+// Description: 
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+
+
+module clock(
+    input clk,
+    input resetn,
+    output [15:0] data
+);
+reg [32:0] counter;
+reg sec_clk;
+
+wire tensec_clk;
+wire min_clk;
+wire tenmin_clk;
+
+always @ (posedge clk, negedge resetn) begin
+    if(!resetn) begin
+        counter <= 0;
+        sec_clk <= 0;
+    end
+    else begin
+        
+        if (counter < 33'd124999)
+            counter <= counter + 33'd1;
+        else begin 
+            counter <= 33'd0;
+            sec_clk <= ~sec_clk;
+        end        
+    end
+end
+
+one one_sec(.one_clk(sec_clk), .reset(resetn), .one(data[3:0]), .ten_clk(tensec_clk));
+ten ten_sec(.ten_clk(tensec_clk), .reset(resetn), .ten(data[7:4]), .one_clk(min_clk));
+one one_min(.one_clk(min_clk), .reset(resetn), .one(data[11:8]), .ten_clk(tenmin_clk));
+tenm ten_min(.ten_clk(tenmin_clk), .reset(resetn), .ten(data[15:12]));
+
+endmodule
